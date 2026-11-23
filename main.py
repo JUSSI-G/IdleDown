@@ -1,4 +1,7 @@
+import logging
+import subprocess
 import time
+from pathlib import Path
 
 import psutil
 
@@ -12,7 +15,21 @@ DISK_LIMIT_BYTES_PER_SECOND = 2_000_000
 CHECK_INTERVAL_SECONDS = 5
 REQUIRED_IDLE_SECONDS = 10 * 60
 COUNTDOWN_SECONDS = 60
-DRY_RUN = True
+DRY_RUN = False
+
+LOG_FILE = Path(__file__).with_name("idledown.log")
+
+
+def setup_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s  %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[
+            logging.FileHandler(LOG_FILE, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+    )
 
 
 def read_byte_totals():
@@ -57,28 +74,36 @@ def format_status(usage, idle_seconds):
 
 
 def run_countdown():
-    print("Idle limit reached. Press Ctrl+C to cancel.")
+    logging.info(f"Idle limit reached, countdown of {COUNTDOWN_SECONDS} s started. Press Ctrl+C to cancel.")
     try:
         for remaining in range(COUNTDOWN_SECONDS, 0, -1):
             print(f"Shutting down in {remaining:3} s", end="\r")
             time.sleep(1)
     except KeyboardInterrupt:
-        print("\nShutdown cancelled.")
+        print()
+        logging.info("Shutdown cancelled by user.")
         return False
     print()
     return True
 
 
 def shut_down():
+    command = " ".join(platform_utils.get_shutdown_command())
     if DRY_RUN:
-        command = " ".join(platform_utils.get_shutdown_command())
-        print(f"Dry run, would run: {command}")
-    else:
+        logging.info(f"Dry run, would run: {command}")
+        return
+    logging.info(f"Shutting down now: {command}")
+    try:
         platform_utils.shutdown_computer()
+    except (OSError, subprocess.CalledProcessError) as error:
+        logging.error(f"Shutdown failed: {error}")
 
 
 def main():
     gpus = platform_utils.find_nvidia_gpus()
+    logging.info(f"Started. NVIDIA GPUs found: {len(gpus)}. Dry run: {DRY_RUN}. "
+                 f"Required idle time: {REQUIRED_IDLE_SECONDS} s.")
+
     previous_totals = read_byte_totals()
     previous_time = time.monotonic()
     idle_start_time = None
@@ -95,7 +120,7 @@ def main():
             idle_start_time = None
             idle_seconds = 0
 
-        print(format_status(usage, idle_seconds))
+        logging.info(format_status(usage, idle_seconds))
 
         if idle_seconds >= REQUIRED_IDLE_SECONDS:
             if run_countdown():
@@ -105,7 +130,9 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logging()
     try:
         main()
     except KeyboardInterrupt:
-        print("\nStopped.")
+        print()
+        logging.info("Stopped by user.")

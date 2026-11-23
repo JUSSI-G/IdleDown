@@ -22,7 +22,15 @@ python main.py --console                       # no window, prints to the termin
 python main.py --idle-minutes 20 --cpu-limit 15
 ```
 
-Everything is logged with timestamps to `idledown.log` next to the app.
+Everything is logged with timestamps to `idledown.log` in a per-user folder:
+
+| OS | Log folder |
+|---|---|
+| Windows | `%LOCALAPPDATA%\IdleDown` |
+| macOS | `~/Library/Application Support/IdleDown` |
+| Linux | `~/.local/state/IdleDown` |
+
+The window shows the exact path, and `--log-file` changes it.
 
 ## Building the exe
 
@@ -41,4 +49,5 @@ The result is `dist\IdleDown.exe`. Build on each OS separately, since PyInstalle
 | `monitor.py` | Reads usage, tracks idle time, shuts down |
 | `gui_app.py` | The window |
 | `console_app.py` | Terminal mode |
-| `platform_utils.py` | Everything OS-specific: the shutdown command and the GPU |
+| `platform_utils.py` | Everything OS-specific: the shutdown command, the GPU and the log folder |
+| `version.py` | The version number |

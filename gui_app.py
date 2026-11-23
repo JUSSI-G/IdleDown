@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from monitor import IdleTimer, UsageReader, shut_down, status_line
+from version import VERSION
 
 
 class IdleDownWindow:
@@ -14,7 +15,8 @@ class IdleDownWindow:
         self.pending_job = None
 
         self.root = tk.Tk()
-        self.root.title("IdleDown (dry run)" if settings.dry_run else "IdleDown")
+        title = f"IdleDown {VERSION}"
+        self.root.title(f"{title} (dry run)" if settings.dry_run else title)
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.build_widgets()
@@ -50,6 +52,9 @@ class IdleDownWindow:
         self.cancel_button = ttk.Button(frame, text="Cancel shutdown", command=self.cancel_countdown)
         self.cancel_button.grid(row=7, column=0, columnspan=3)
         self.cancel_button.state(["disabled"])
+
+        ttk.Label(frame, text=f"Log: {self.settings.log_file}", foreground="gray").grid(
+            row=8, column=0, columnspan=3, pady=(12, 0))
 
     def run(self):
         self.schedule(self.settings.check_interval_seconds, self.check_usage)

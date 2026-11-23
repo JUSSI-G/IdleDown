@@ -1,9 +1,10 @@
 import argparse
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import platform_utils
 from monitor import Limits
+from version import VERSION
 
 
 @dataclass
@@ -15,12 +16,6 @@ class Settings:
     dry_run: bool
     console: bool
     log_file: Path
-
-
-def app_folder():
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).parent
-    return Path(__file__).parent
 
 
 def build_parser():
@@ -46,8 +41,10 @@ def build_parser():
                         help="only log what would happen, never shut down")
     parser.add_argument("--console", action="store_true",
                         help="run in the terminal instead of a window")
-    parser.add_argument("--log-file", type=Path, default=app_folder() / "idledown.log",
-                        help="where to write the log (default: idledown.log next to the app)")
+    parser.add_argument("--log-file", type=Path,
+                        default=platform_utils.get_app_data_folder() / "idledown.log",
+                        help="where to write the log (default: %(default)s)")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     return parser
 
 

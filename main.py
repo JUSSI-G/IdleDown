@@ -2,9 +2,11 @@ import logging
 import sys
 
 from settings import parse_settings
+from version import VERSION
 
 
 def setup_logging(log_file):
+    log_file.parent.mkdir(parents=True, exist_ok=True)
     handlers = [logging.FileHandler(log_file, encoding="utf-8")]
     if sys.stderr is not None:
         handlers.append(logging.StreamHandler())
@@ -19,7 +21,7 @@ def setup_logging(log_file):
 def main():
     settings = parse_settings()
     setup_logging(settings.log_file)
-    logging.info(f"Started. Settings: {settings}")
+    logging.info(f"IdleDown {VERSION} started. Settings: {settings}")
 
     if settings.console:
         from console_app import run_console

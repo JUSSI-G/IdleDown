@@ -1,5 +1,7 @@
+import os
 import subprocess
 import sys
+from pathlib import Path
 
 try:
     import pynvml
@@ -38,3 +40,13 @@ def get_shutdown_command():
 def shutdown_computer():
     hide_console_window = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
     subprocess.run(get_shutdown_command(), check=True, creationflags=hide_console_window)
+
+
+def get_app_data_folder():
+    if sys.platform == "win32":
+        base_folder = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local"))
+    elif sys.platform == "darwin":
+        base_folder = Path.home() / "Library" / "Application Support"
+    else:
+        base_folder = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+    return base_folder / "IdleDown"

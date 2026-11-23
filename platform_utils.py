@@ -36,4 +36,5 @@ def get_shutdown_command():
 
 
 def shutdown_computer():
-    subprocess.run(get_shutdown_command(), check=True)
+    hide_console_window = subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0
+    subprocess.run(get_shutdown_command(), check=True, creationflags=hide_console_window)

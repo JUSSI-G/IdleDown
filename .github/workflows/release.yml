@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check that the tag matches version.py
+        run: |
+          $version = python -c "from version import VERSION; print(VERSION)"
+          if ("v$version" -ne $env:TAG) {
+            Write-Error "Tag $env:TAG does not match version.py ($version)"
+            exit 1
+          }
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build the exe
+        run: |
+          pip install -r requirements-dev.txt
+          pyinstaller --onefile --windowed --name IdleDown --clean main.py
+
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build the installer
+        run: iscc "/DAppVersion=$env:APP_VERSION" installer.iss
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create $env:TAG
+          "installer-output/IdleDown-Setup-$env:APP_VERSION.exe"
+          --title "IdleDown $env:APP_VERSION"
+          --generate-notes

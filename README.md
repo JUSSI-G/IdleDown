@@ -6,7 +6,13 @@ Every few seconds it measures CPU %, GPU % (NVIDIA only, skipped otherwise), net
 
 On Windows the shutdown is forced (`shutdown /s /f`), because Windows refuses a normal shutdown while the screen is locked. Open apps are closed without asking, so save your work before leaving IdleDown running.
 
-## Running
+## Download (Windows)
+
+Get `IdleDown-Setup-<version>.exe` from the [Releases page](https://github.com/JUSSI-G/IdleDown/releases/latest) and run it. It installs for your user only, so no admin rights are needed, and adds a Start menu shortcut (a desktop shortcut is optional). Uninstall it from Settings → Apps → Installed apps.
+
+The installer isn't digitally signed, so Windows may show "Windows protected your PC". Click **More info → Run anyway**.
+
+## Running from source
 
 ```powershell
 python -m venv .venv
@@ -42,6 +48,26 @@ The window shows the exact path, and `--log-file` changes it.
 
 The result is `dist\IdleDown.exe`. Build on each OS separately, since PyInstaller can't cross-compile.
 
+## Building the installer
+
+Install Inno Setup once with `winget install --id JRSoftware.InnoSetup.7 -e`, then:
+
+```powershell
+.\build-installer.ps1
+```
+
+This builds the exe and then `installer-output\IdleDown-Setup-<version>.exe`.
+
+## Releasing a new version
+
+1. Change the number in `version.py`, for example to `0.4.0`, and commit it.
+2. Tag the commit and push the tag:
+   ```powershell
+   git tag v0.4.0
+   git push origin v0.4.0
+   ```
+3. GitHub Actions (`.github/workflows/release.yml`) builds the installer and publishes it as a new release. The tag must match `version.py`, or the build stops.
+
 ## Files
 
 | File | What it does |
@@ -53,3 +79,6 @@ The result is `dist\IdleDown.exe`. Build on each OS separately, since PyInstalle
 | `console_app.py` | Terminal mode |
 | `platform_utils.py` | Everything OS-specific: the shutdown command, the GPU and the log folder |
 | `version.py` | The version number |
+| `installer.iss` | The Inno Setup installer script |
+| `build.ps1`, `build-installer.ps1` | Build the exe, and the exe plus the installer |
+| `.github/workflows/release.yml` | Builds and publishes the installer when a version tag is pushed |

@@ -31,7 +31,7 @@ def get_gpu_usage(gpus):
 
 def get_shutdown_command():
     if sys.platform == "win32":
-        return ["shutdown", "/s", "/t", "0"]
+        return ["shutdown", "/s", "/f", "/t", "0"]
     if sys.platform == "darwin":
         return ["osascript", "-e", 'tell application "System Events" to shut down']
     return ["systemctl", "poweroff"]

@@ -31,8 +31,8 @@ def run_console(settings):
 
             if timer.is_finished():
                 if run_countdown(settings.countdown_seconds):
-                    shut_down(settings.dry_run)
-                    if not settings.dry_run:
+                    succeeded = shut_down(settings.dry_run)
+                    if succeeded and not settings.dry_run:
                         return
                 timer.reset()
     except KeyboardInterrupt:

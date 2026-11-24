@@ -4,6 +4,8 @@ Shuts down the computer once it has been continuously idle for a while. Handy fo
 
 Every few seconds it measures CPU %, GPU % (NVIDIA only, skipped otherwise), network speed and disk speed. When all of them stay under their limits for the whole idle time (10 minutes by default), it shows a countdown you can cancel, then shuts down. Any activity resets the idle timer, so short pauses between downloaded files or Steam unpacking to disk won't trigger a shutdown.
 
+On Windows the shutdown is forced (`shutdown /s /f`), because Windows refuses a normal shutdown while the screen is locked. Open apps are closed without asking, so save your work before leaving IdleDown running.
+
 ## Running
 
 ```powershell

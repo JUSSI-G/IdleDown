@@ -19,6 +19,7 @@ class IdleDownWindow:
         self.root.title(f"{title} (dry run)" if settings.dry_run else title)
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.close)
+        self.root.report_callback_exception = log_unexpected_error
         self.build_widgets()
 
     def build_widgets(self):
@@ -100,8 +101,10 @@ class IdleDownWindow:
             self.schedule(1, self.tick_countdown)
             return
 
-        shut_down(self.settings.dry_run)
-        if self.settings.dry_run:
+        succeeded = shut_down(self.settings.dry_run)
+        if not succeeded:
+            self.back_to_watching("Shutdown failed, see the log. Watching...", is_error=True)
+        elif self.settings.dry_run:
             self.back_to_watching("Dry run: would have shut down now. Watching...")
         else:
             self.root.destroy()
@@ -111,11 +114,11 @@ class IdleDownWindow:
         logging.info("Shutdown cancelled by user.")
         self.back_to_watching("Shutdown cancelled. Watching...")
 
-    def back_to_watching(self, message):
+    def back_to_watching(self, message, is_error=False):
         self.timer.reset()
         self.cancel_button.state(["disabled"])
         self.root.attributes("-topmost", False)
-        self.status_label.config(text=message, foreground="")
+        self.status_label.config(text=message, foreground="red" if is_error else "")
         self.schedule(self.settings.check_interval_seconds, self.check_usage)
 
     def bring_to_front(self):
@@ -127,6 +130,10 @@ class IdleDownWindow:
     def close(self):
         logging.info("Stopped by user.")
         self.root.destroy()
+
+
+def log_unexpected_error(error_type, error, traceback):
+    logging.error("Unexpected error", exc_info=(error_type, error, traceback))
 
 
 def format_duration(seconds):

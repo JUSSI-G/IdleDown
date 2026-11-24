@@ -108,9 +108,11 @@ def shut_down(dry_run):
     command = " ".join(platform_utils.get_shutdown_command())
     if dry_run:
         logging.info(f"Dry run, would run: {command}")
-        return
+        return True
     logging.info(f"Shutting down now: {command}")
     try:
         platform_utils.shutdown_computer()
     except (OSError, subprocess.CalledProcessError) as error:
         logging.error(f"Shutdown failed: {error}")
+        return False
+    return True

@@ -30,9 +30,7 @@ jobs:
           "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Build the exe
-        run: |
-          pip install -r requirements-dev.txt
-          pyinstaller --onefile --windowed --name IdleDown --clean main.py
+        run: .\build.ps1
 
       - name: Install Inno Setup
         run: choco install innosetup --yes --no-progress

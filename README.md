@@ -82,3 +82,5 @@ This builds the exe and then `installer-output\IdleDown-Setup-<version>.exe`.
 | `installer.iss` | The Inno Setup installer script |
 | `build.ps1`, `build-installer.ps1` | Build the exe, and the exe plus the installer |
 | `.github/workflows/release.yml` | Builds and publishes the installer when a version tag is pushed |
+| `assets/` | The app icon (`IdleDown.ico` for Windows, `IdleDown.png` for the window) |
+| `tools/make_icon.py` | Draws the icon. Run `pip install pillow`, then `python tools/make_icon.py` |

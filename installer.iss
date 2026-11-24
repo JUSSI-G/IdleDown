@@ -19,6 +19,7 @@ OutputBaseFilename=IdleDown-Setup-{#AppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=assets\IdleDown.ico
 UninstallDisplayIcon={app}\IdleDown.exe
 CloseApplications=yes
 

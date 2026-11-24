@@ -1,5 +1,7 @@
 import logging
+import sys
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
 from monitor import IdleTimer, UsageReader, shut_down, status_line
@@ -20,7 +22,15 @@ class IdleDownWindow:
         self.root.resizable(False, False)
         self.root.protocol("WM_DELETE_WINDOW", self.close)
         self.root.report_callback_exception = log_unexpected_error
+        self.set_window_icon()
         self.build_widgets()
+
+    def set_window_icon(self):
+        try:
+            self.icon_image = tk.PhotoImage(file=asset_path("IdleDown.png"))
+            self.root.iconphoto(True, self.icon_image)
+        except tk.TclError:
+            logging.warning("Window icon not found, using the default one.")
 
     def build_widgets(self):
         frame = ttk.Frame(self.root, padding=16)
@@ -130,6 +140,11 @@ class IdleDownWindow:
     def close(self):
         logging.info("Stopped by user.")
         self.root.destroy()
+
+
+def asset_path(file_name):
+    app_folder = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+    return app_folder / "assets" / file_name
 
 
 def log_unexpected_error(error_type, error, traceback):

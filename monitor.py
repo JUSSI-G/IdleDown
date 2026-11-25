@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import time
+from collections import deque
 from dataclasses import dataclass
 
 import psutil
@@ -33,7 +34,7 @@ class Usage:
         return f"{self.cpu_percent:.1f} %"
 
     def gpu_text(self):
-        return "n/a" if self.gpu_percent is None else f"{self.gpu_percent} %"
+        return "n/a" if self.gpu_percent is None else f"{self.gpu_percent:.0f} %"
 
     def network_text(self):
         return f"{self.network_bytes_per_second / 1_000:.1f} KB/s"
@@ -73,6 +74,25 @@ class UsageReader:
         self.previous_totals = (network_total, disk_total)
         self.previous_time = current_time
         return Usage(cpu_percent, gpu_percent, network_speed, disk_speed)
+
+
+class UsageAverage:
+    def __init__(self, reading_count):
+        self.recent_readings = deque(maxlen=max(1, reading_count))
+
+    def add(self, usage):
+        self.recent_readings.append(usage)
+        return self.average()
+
+    def average(self):
+        readings = self.recent_readings
+        gpu_values = [usage.gpu_percent for usage in readings if usage.gpu_percent is not None]
+        return Usage(
+            cpu_percent=sum(usage.cpu_percent for usage in readings) / len(readings),
+            gpu_percent=sum(gpu_values) / len(gpu_values) if gpu_values else None,
+            network_bytes_per_second=sum(usage.network_bytes_per_second for usage in readings) / len(readings),
+            disk_bytes_per_second=sum(usage.disk_bytes_per_second for usage in readings) / len(readings),
+        )
 
 
 class IdleTimer:

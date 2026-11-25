@@ -1,7 +1,8 @@
 import logging
 import time
 
-from monitor import IdleTimer, UsageReader, shut_down, status_line
+from monitor import IdleTimer, UsageAverage, UsageReader, shut_down, status_line
+from settings import readings_to_average
 
 
 def run_countdown(seconds):
@@ -20,12 +21,13 @@ def run_countdown(seconds):
 
 def run_console(settings):
     reader = UsageReader()
+    average = UsageAverage(readings_to_average(settings))
     timer = IdleTimer(settings.required_idle_seconds)
 
     try:
         while True:
             time.sleep(settings.check_interval_seconds)
-            usage = reader.read()
+            usage = average.add(reader.read())
             timer.update(usage.is_below(settings.limits))
             logging.info(status_line(usage, timer))
 

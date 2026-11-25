@@ -4,7 +4,8 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import ttk
 
-from monitor import IdleTimer, UsageReader, shut_down, status_line
+from monitor import IdleTimer, UsageAverage, UsageReader, shut_down, status_line
+from settings import readings_to_average
 from version import VERSION
 
 
@@ -12,6 +13,7 @@ class IdleDownWindow:
     def __init__(self, settings):
         self.settings = settings
         self.reader = UsageReader()
+        self.average = UsageAverage(readings_to_average(settings))
         self.timer = IdleTimer(settings.required_idle_seconds)
         self.seconds_left = 0
         self.pending_job = None
@@ -64,8 +66,10 @@ class IdleDownWindow:
         self.cancel_button.grid(row=7, column=0, columnspan=3)
         self.cancel_button.state(["disabled"])
 
+        ttk.Label(frame, text=f"Readings are averaged over {self.settings.average_seconds:g} s",
+                  foreground="gray").grid(row=8, column=0, columnspan=3, pady=(12, 0))
         ttk.Label(frame, text=f"Log: {self.settings.log_file}", foreground="gray").grid(
-            row=8, column=0, columnspan=3, pady=(12, 0))
+            row=9, column=0, columnspan=3)
 
     def run(self):
         self.schedule(self.settings.check_interval_seconds, self.check_usage)
@@ -75,7 +79,7 @@ class IdleDownWindow:
         self.pending_job = self.root.after(int(seconds * 1000), callback)
 
     def check_usage(self):
-        usage = self.reader.read()
+        usage = self.average.add(self.reader.read())
         self.timer.update(usage.is_below(self.settings.limits))
         logging.info(status_line(usage, self.timer))
         self.show_usage(usage)

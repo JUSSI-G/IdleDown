@@ -5,18 +5,19 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   windows-installer:
     runs-on: windows-latest
+    permissions:
+      contents: write
     env:
       TAG: ${{ github.ref_name }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.12"
 
@@ -29,11 +30,16 @@ jobs:
           }
           "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Run the tests
+        run: |
+          pip install -r requirements.txt
+          python -m unittest discover -s tests -v
+
       - name: Build the exe
         run: .\build.ps1
 
       - name: Install Inno Setup
-        run: choco install innosetup --yes --no-progress
+        run: choco install innosetup --version 6.7.1 --allow-downgrade --yes --no-progress
 
       - name: Build the installer
         run: iscc "/DAppVersion=$env:APP_VERSION" installer.iss

@@ -12,6 +12,14 @@ Get `IdleDown-Setup-<version>.exe` from the [Releases page](https://github.com/J
 
 The installer isn't digitally signed, so Windows may show "Windows protected your PC". Click **More info → Run anyway**.
 
+## Fitting it to your PC
+
+Every PC has a different "quiet" level, so the limits may need adjusting:
+
+- When the PC counts as busy, the window says why, for example "Busy: Disk is over its limit", and shows that value in orange. The log records it too.
+- **Settings** opens a window with all limits and timings. They're saved to `settings.json` in the same folder as the log and used on every start.
+- **Measure my idle PC** in the settings window watches your PC for two minutes while you leave it alone, then fills in limits that fit it. It never suggests limits stricter than the defaults, and it tells you if the PC wasn't quiet enough to measure.
+
 ## Running from source
 
 ```powershell
@@ -21,7 +29,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Useful options:
+Command-line options override the saved settings for that run. If you then press Save in the settings window, the values in use, including those options, are saved.
 
 ```powershell
 python main.py --help
@@ -30,7 +38,7 @@ python main.py --console                       # no window, prints to the termin
 python main.py --idle-minutes 20 --cpu-limit 15
 ```
 
-Everything is logged with timestamps to `idledown.log` in a per-user folder:
+Everything is logged with timestamps to `idledown.log` in a per-user folder, next to `settings.json`:
 
 | OS | Log folder |
 |---|---|
@@ -73,7 +81,9 @@ This builds the exe and then `installer-output\IdleDown-Setup-<version>.exe`.
 | File | What it does |
 |---|---|
 | `main.py` | Starts the app: reads settings, sets up logging, opens the window or console mode |
-| `settings.py` | Command-line options |
+| `settings.py` | Settings: defaults, the saved settings file and command-line options |
+| `settings_window.py` | The settings window |
+| `calibration.py` | Measures an idle PC and suggests limits |
 | `monitor.py` | Reads usage, tracks idle time, shuts down |
 | `gui_app.py` | The window |
 | `console_app.py` | Terminal mode |

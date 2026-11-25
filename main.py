@@ -19,9 +19,11 @@ def setup_logging(log_file):
 
 
 def main():
-    settings = parse_settings()
+    settings, settings_problems = parse_settings()
     setup_logging(settings.log_file)
     logging.info(f"IdleDown {VERSION} started. Settings: {settings}")
+    for problem in settings_problems:
+        logging.warning(f"Settings file: {problem}")
 
     if settings.console:
         from console_app import run_console

@@ -29,7 +29,7 @@ def run_console(settings):
             time.sleep(settings.check_interval_seconds)
             usage = average.add(reader.read())
             timer.update(usage.is_below(settings.limits))
-            logging.info(status_line(usage, timer))
+            logging.info(status_line(usage, timer, settings.limits))
 
             if timer.is_finished():
                 if run_countdown(settings.countdown_seconds):

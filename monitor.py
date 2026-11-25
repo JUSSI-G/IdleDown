@@ -24,11 +24,20 @@ class Usage:
     network_bytes_per_second: float
     disk_bytes_per_second: float
 
+    def over_limits(self, limits):
+        busy_signals = []
+        if self.cpu_percent >= limits.cpu_percent:
+            busy_signals.append("CPU")
+        if self.gpu_percent is not None and self.gpu_percent >= limits.gpu_percent:
+            busy_signals.append("GPU")
+        if self.network_bytes_per_second >= limits.network_bytes_per_second:
+            busy_signals.append("Network")
+        if self.disk_bytes_per_second >= limits.disk_bytes_per_second:
+            busy_signals.append("Disk")
+        return busy_signals
+
     def is_below(self, limits):
-        return (self.cpu_percent < limits.cpu_percent
-                and (self.gpu_percent is None or self.gpu_percent < limits.gpu_percent)
-                and self.network_bytes_per_second < limits.network_bytes_per_second
-                and self.disk_bytes_per_second < limits.disk_bytes_per_second)
+        return not self.over_limits(limits)
 
     def cpu_text(self):
         return f"{self.cpu_percent:.1f} %"
@@ -118,10 +127,14 @@ class IdleTimer:
         self.idle_since = None
 
 
-def status_line(usage, timer):
-    return (f"CPU {usage.cpu_text():>8}  GPU {usage.gpu_text():>5}  "
+def status_line(usage, timer, limits):
+    line = (f"CPU {usage.cpu_text():>8}  GPU {usage.gpu_text():>5}  "
             f"NET {usage.network_text():>12}  DISK {usage.disk_text():>11}  "
             f"idle {timer.idle_seconds():4.0f}/{timer.required_seconds:.0f} s")
+    busy_signals = usage.over_limits(limits)
+    if busy_signals:
+        line += f"  busy: {', '.join(busy_signals)}"
+    return line
 
 
 def shut_down(dry_run):

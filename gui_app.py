@@ -109,7 +109,7 @@ class IdleDownWindow:
 
     def start_measurement(self):
         self.measurement = IdleMeasurement()
-        logging.info("Idle measurement started.")
+        logging.info("Measurement started.")
 
     def stop_measurement(self):
         self.measurement = None
@@ -153,7 +153,7 @@ class IdleDownWindow:
         self.idle_label.config(text=f"Idle for {format_duration(idle_seconds)} of {format_duration(required)}")
 
         if self.measurement is not None:
-            self.status_label.config(text="Measuring your idle PC...", foreground="")
+            self.status_label.config(text="Measuring... shutdown is paused", foreground="")
         elif busy_signals:
             self.status_label.config(text=busy_text(busy_signals), foreground=BUSY_COLOR)
         else:

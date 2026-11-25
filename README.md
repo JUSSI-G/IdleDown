@@ -19,6 +19,7 @@ Every PC has a different "quiet" level, so the limits may need adjusting:
 - When the PC counts as busy, the window says why, for example "Busy: Disk is over its limit", and shows that value in orange. The log records it too.
 - **Settings** opens a window with all limits and timings. They're saved to `settings.json` in the same folder as the log and used on every start.
 - **Measure my idle PC** in the settings window watches your PC for two minutes while you leave it alone, then fills in limits that fit it. It never suggests limits stricter than the defaults, and it tells you if the PC wasn't quiet enough to measure.
+- **Check my running job** watches the job you're about to leave running for two minutes. It tells you whether IdleDown reliably sees the job as busy, or whether the job comes close to the limits, where a dip could look like idle. It only checks and warns; it never changes your limits. A job can have quieter phases than the two minutes it watched, such as evaluation between training epochs, so treat an orange result as a reason not to rely on IdleDown for that job.
 
 ## Running from source
 
@@ -83,7 +84,7 @@ This builds the exe and then `installer-output\IdleDown-Setup-<version>.exe`.
 | `main.py` | Starts the app: reads settings, sets up logging, opens the window or console mode |
 | `settings.py` | Settings: defaults, the saved settings file and command-line options |
 | `settings_window.py` | The settings window |
-| `calibration.py` | Measures an idle PC and suggests limits |
+| `calibration.py` | Measures an idle PC or a running job and suggests limits |
 | `monitor.py` | Reads usage, tracks idle time, shuts down |
 | `gui_app.py` | The window |
 | `console_app.py` | Terminal mode |
